@@ -19,30 +19,18 @@ local function open_float(lines, opts)
   local width = window.width > 1 and window.width or opts.width or 85
   local height = window.height > 1 and window.height or opts.height or 17
 
+  local current_bufnr = api.nvim_get_current_buf()
   local bufnr = api.nvim_create_buf(false, true)
   util.set_option(bufnr, "filetype", opts.filetype or "codecompanion")
-  local winnr = api.nvim_open_win(bufnr, true, {
-    relative = opts.relative or "cursor",
-    border = "single",
-    width = width,
-    height = height,
-    style = "minimal",
-    row = 10,
-    col = 0,
-    title = opts.title or "Options",
-    title_pos = "center",
-  })
 
   api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+  api.nvim_win_set_buf(0, bufnr)
 
   vim.bo[bufnr].modified = false
   vim.bo[bufnr].modifiable = false
 
-  if opts.opts then
-    ui.set_win_options(winnr, opts.opts)
-  end
-
   local function close()
+    api.nvim_win_set_buf(0, current_bufnr)
     api.nvim_buf_delete(bufnr, { force = true })
   end
 

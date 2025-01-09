@@ -66,17 +66,20 @@ function UI:open()
   local window = config.display.chat.window
   local width = window.width > 1 and window.width or math.floor(vim.o.columns * window.width)
   local height = window.height > 1 and window.height or math.floor(vim.o.lines * window.height)
+  local padding = window.border ~= "none" and 2 or 0
+  local row = window.row > 1 and window.row or math.floor((vim.o.lines - height - padding) * window.row)
+  local col = window.col > 1 and window.col or math.floor((vim.o.columns - width - padding) * window.col)
 
   if window.layout == "float" then
     local win_opts = {
       relative = window.relative,
       width = width,
       height = height,
-      row = window.row or math.floor((vim.o.lines - height) / 2),
-      col = window.col or math.floor((vim.o.columns - width) / 2),
+      row = row,
+      col = col,
       border = window.border,
       title = "Code Companion",
-      title_pos = "center",
+      title_pos = window.title_pos,
       zindex = 45,
     }
     self.winnr = api.nvim_open_win(self.bufnr, true, win_opts)
@@ -207,11 +210,13 @@ function UI:render(context, messages, opts)
   local last_set_role
 
   local function add_messages_to_buf(msgs)
+    local vis = 0
     for i, msg in ipairs(msgs) do
       if msg.role ~= config.constants.SYSTEM_ROLE or (msg.opts and msg.opts.visible ~= false) then
-        if i > 1 and self.last_role ~= msg.role then
+        if vis > 1 + vis and self.last_role ~= msg.role then
           spacer()
         end
+        vis = vis + 1
 
         if msg.role == config.constants.USER_ROLE and last_set_role ~= config.constants.USER_ROLE then
           self:set_header(lines, self.roles.user)

@@ -57,8 +57,11 @@ local function ts_parse_settings(bufnr, adapter)
   local query = vim.treesitter.query.get("yaml", "chat")
   local root = parser:parse()[1]:root()
 
-  for _, match in query:iter_matches(root, bufnr, nil, nil, { all = false }) do
-    local value = vim.treesitter.get_node_text(match[1], bufnr)
+  for _, matches, _ in query:iter_matches(root, bufnr) do
+    local nodes = matches[1]
+    local node = type(nodes) == "table" and nodes[1] or nodes
+
+    local value = vim.treesitter.get_node_text(node, bufnr)
 
     settings = yaml.decode(value)
     break
@@ -589,7 +592,7 @@ function Chat:submit(opts)
   self:check_references()
   self:add_pins()
 
-  -- Check if the user has manually overriden the adapter
+  -- Check if the user has manually overridden the adapter
   if vim.g.codecompanion_adapter and self.adapter.name ~= vim.g.codecompanion_adapter then
     self.adapter = adapters.resolve(config.adapters[vim.g.codecompanion_adapter])
   end

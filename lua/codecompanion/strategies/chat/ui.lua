@@ -210,13 +210,11 @@ function UI:render(context, messages, opts)
   local last_set_role
 
   local function add_messages_to_buf(msgs)
-    local vis = 0
     for i, msg in ipairs(msgs) do
       if msg.role ~= config.constants.SYSTEM_ROLE or (msg.opts and msg.opts.visible ~= false) then
-        if vis > 1 + vis and self.last_role ~= msg.role then
+        if self.last_role and self.last_role ~= msg.role then
           spacer()
         end
-        vis = vis + 1
 
         if msg.role == config.constants.USER_ROLE and last_set_role ~= config.constants.USER_ROLE then
           self:set_header(lines, self.roles.user)

@@ -77,17 +77,22 @@ function UI:open()
   local window = config.display.chat.window
   local width = window.width > 1 and window.width or math.floor(vim.o.columns * window.width)
   local height = window.height > 1 and window.height or math.floor(vim.o.lines * window.height)
+  local padding = window.border ~= "none" and 2 or 0
+  local row = window.row or 0.5
+  local col = window.col or 0.5
+  row = row > 1 and row or math.floor((vim.o.lines - height - padding) * row)
+  col = col > 1 and col or math.floor((vim.o.columns - width - padding) * col)
 
   if window.layout == "float" then
     local win_opts = {
       relative = window.relative,
       width = width,
       height = height,
-      row = window.row or math.floor((vim.o.lines - height) / 2),
-      col = window.col or math.floor((vim.o.columns - width) / 2),
+      row = row,
+      col = col,
       border = window.border,
       title = window.title or "CodeCompanion",
-      title_pos = "center",
+      title_pos = window.title_pos or "center",
       zindex = 45,
     }
     self.winnr = api.nvim_open_win(self.bufnr, true, win_opts)
